@@ -6,11 +6,11 @@ import {
 } from "@aws-sdk/client-kinesis-video-webrtc-storage";
 import { SignalingClient, Role } from "amazon-kinesis-video-streams-webrtc";
 
-const streamName = "stream_name";
-const region = "region_name";
-const accessKeyId = "access_key_id";
-const secretAccessKey = "secret_access_key";
-const channelName = "channel_name";
+const streamName = process.env.REACT_APP_STREAM_NAME;
+const region = process.env.REACT_APP_REGION;
+const accessKeyId = process.env.REACT_APP_AWS_ACCESS_KEY_ID;
+const secretAccessKey = process.env.REACT_APP_AWS_SECRET_ACCESS_KEY;
+const channelName = process.env.REACT_APP_CHANNEL_NAME;
 
 const peerConnectionByClientId = {};
 
@@ -142,25 +142,8 @@ const KinesisVideoStream = () => {
           const command = new JoinStorageSessionCommand(input);
           const response = await kinesisVideoWebrtcStorageClient.send(command);
           console.dir(response);
-
-          // Get a stream from the webcam, add it to the peer connection, and display it in the local view
-          // const peerConnection = new RTCPeerConnection({ iceServers });
-          // try {
-          //   localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-          //   localVideo.srcObject = localStream;
-          // } catch (e) {
-          //   // Could not find webcam
-          //   return;
-          // }
-          // const offer = await peerConnection.createOffer({
-          //   offerToReceiveAudio: false,
-          //   offerToReceiveVideo: true
-          // });
-          // await peerConnection.setLocalDescription(offer);
-          // signalingClient.sendSdpOffer(peerConnection.localDescription);
         });
 
-        // When an ICE candidate is received from the master, add it to the peer connection.
         signalingClient.on("iceCandidate", (candidate, remoteClientId) => {
           console.log("Received ICE candidate from client " + remoteClientId);
           peerConnectionByClientId[remoteClientId].addIceCandidate(candidate);
@@ -201,7 +184,6 @@ const KinesisVideoStream = () => {
               signalingClient.sendIceCandidate(candidate);
             } else {
               // No more ICE candidates will be generated
-              // signalingClient.sendSdpAnswer(peerConnection.localDescription);
             }
           });
 
@@ -247,7 +229,6 @@ const KinesisVideoStream = () => {
         peerConnectionByClientId[clientId].close();
         delete peerConnectionByClientId[clientId];
       });
-      // peerConnectionByClientId = {};
       if (localStreamRef.current) {
         localStreamRef.current.getTracks().forEach(track => track.stop());
       }
